@@ -1,20 +1,28 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # vim: set ts=2 sw=2 sts=2 et:
 
 
-from setuptools import setup
+import imp
 import os
 import sys
 import shutil
+from setuptools import setup
 from subprocess import Popen
-from diovio import VERSION, AUTHOR, AUTHOR_EMAIL, URL, NAME, DESCRIPTION, LICENSE
+dioivo = imp.load_source('dioivo', './dioivo')
 
 #####################################################
 #NOTE: The .deb generation via bdist_rpm override   #
 #      requires: fakeroot, alien, dpkg-buildpackage #
 #####################################################
 
+NAME        = "dioivo"
+VERSION     = dioivo.VERSION
+AUTHOR      = dioivo.AUTHOR
+AUTHOR_EMAIL= dioivo.AUTHOR_EMAIL
+URL         = dioivo.URL
+LICENSE     = "GPLv3"
+DESCRIPTION = "HTTP Benchmarking tool using access log to extract requests and simulate traffic"
 
 #-- GOBAL VARS --#
 LONG_DESCRIPTION = """%s
