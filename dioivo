@@ -661,7 +661,7 @@ def dioivo_getopts():
   opts = parser.parse_args()
 
   if opts.version:
-    print( "dioivo %s\nAuthor: %s <%s>\nProject: %s" % (
+    print( "         dioivo %s\n Author: %s <%s>\nProject: %s" % (
       VERSION,
       AUTHOR,
       AUTHOR_EMAIL,
