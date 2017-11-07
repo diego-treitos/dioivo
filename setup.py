@@ -39,12 +39,12 @@ DATA_FILES={}
 
 #-- PYPI VARS --#
 PYPI_DOWNLOAD_URL='https://github.com/diego-treitos/diovio/archive/v'+VERSION+'.tar.gz'
-PYPI_DEPENS=['urllib3']
+PYPI_DEPENS=['urllib3', 'numpy']
 PYPI_KEYWORDS=['http', 'benchmark', 'web', 'performance', 'access.log', 'log', 'plot']
 
 
 #-- DEB VARS --#
-DEB_DEPENDS=['python-urllib3']
+DEB_DEPENDS=['python-urllib3', 'python-numpy']
 DEB_RECOMMENDS=['python-matplotlib']
 DEB_SETUP_DIR='setup.files'
 
