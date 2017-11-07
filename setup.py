@@ -39,7 +39,7 @@ DATA_FILES={}
 
 #-- PYPI VARS --#
 PYPI_DOWNLOAD_URL='https://github.com/diego-treitos/diovio/archive/v'+VERSION+'.tar.gz'
-PYPI_DEPENS=['urllib3', 'numpy']
+PYPI_DEPENDS=['urllib3', 'numpy']
 PYPI_KEYWORDS=['http', 'benchmark', 'web', 'performance', 'access.log', 'log', 'plot']
 
 
@@ -142,6 +142,12 @@ setup(
   # This next part it for the Cheese Shop, look a little down the page.
   # classifiers = []
   data_files = DATA_FILES,
+  # keywords
+  keywords = PYPI_KEYWORDS,
+  # requirements
+  install_requires = PYPI_DEPENDS,
+  # tarball url
+  download_url = PYPI_DOWNLOAD_URL
 )
 
 # PostSetup
