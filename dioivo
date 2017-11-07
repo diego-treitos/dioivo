@@ -2,7 +2,7 @@
 # -*- coding:utf8 -*-
 # vim: set ts=2 sw=2 sts=2 et:
 #
-#  PyWench. A log driven web benchmarking tool.
+#  Dioivo. A log driven web benchmarking tool.
 #  Copyright (C) 2014  Diego Blanco
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -55,7 +55,7 @@ START_TIME=0
 STOP_TIME=0
 
 
-class pywenchColor():
+class dioivoColor():
 
   def __init__( self ):
     # foreground colors
@@ -118,7 +118,7 @@ def print_debug( msg, new_line=True ):
   sys.stdout.flush()
 
 
-class PywenchException( Exception ):
+class dioivoException( Exception ):
   def __init__(self, msg):
     self.val = msg
 
@@ -126,7 +126,7 @@ class PywenchException( Exception ):
     return '\r' + repr( self.val )
 
 
-class PyWenchManager( object ):
+class dioivoManager( object ):
 
   def __init__( self, concurrency ):
     self.pl = []  # Process List
@@ -152,7 +152,7 @@ class PyWenchManager( object ):
       p.terminate()
 
 
-class PyWenchAgent( object ):
+class dioivoAgent( object ):
 
   def __init__( self, host, http_version=11, auth_rule=None, headers={} ):
     self.host = host
@@ -168,7 +168,7 @@ class PyWenchAgent( object ):
       httplib.HTTPConnection._http_vsn = 11
       httplib.HTTPConnection._http_vsn_str = 'HTTP/1.1'
     else:
-      raise PywenchException('Bad HTTP version: %s' % repr(self.http_version))
+      raise dioivoException('Bad HTTP version: %s' % repr(self.http_version))
 
     if self.auth_rule:
       try:
@@ -177,7 +177,7 @@ class PyWenchAgent( object ):
         url=auth[1]
 
         if url[:7].lower() != 'http://' or url[:8].lower() != 'https://':
-          raise PywenchException('Bad authentication rule syntax: URL does not start by http:// or https://')
+          raise dioivoException('Bad authentication rule syntax: URL does not start by http:// or https://')
 
         params={}
         for p in auth[2:]:
@@ -196,12 +196,12 @@ class PyWenchAgent( object ):
           r = tpool.request('POST', '%s', fields=params)
           cookie = r.getheader('set-cookie')
         else:
-          raise PywenchException('Bad authentication rule syntax: Only POST or GET methods allowed.')
+          raise dioivoException('Bad authentication rule syntax: Only POST or GET methods allowed.')
 
         DEFAULT_HEADERS['Cookie'] = cookie
 
       except IndexError:
-        raise PywenchException('Bad authentication rule syntax')
+        raise dioivoException('Bad authentication rule syntax')
 
     if self.headers:
       for h in self.headers:
@@ -286,7 +286,7 @@ class UrlProvider( object ):
     """mode = [random,squence]"""
 
     if mode.lower() not in ('random', 'sequence'):
-      raise PywenchException('Invalid url choosing mode')
+      raise dioivoException('Invalid url choosing mode')
 
     self.requests_number = requests_number
     self.mode = mode.lower()
@@ -297,7 +297,7 @@ class UrlProvider( object ):
     try:
       self.queue = self.__filter_urls(urls_file_path)
     except IOError as e:
-      raise PywenchException('Unable to open file: %s. %s' % (urls_file_path, e.__str__()))
+      raise dioivoException('Unable to open file: %s. %s' % (urls_file_path, e.__str__()))
 
   def __parse_replace_parameter(self, rpl):
     for rp in rpl:
@@ -319,7 +319,11 @@ class UrlProvider( object ):
         fields = line.split()
         for m in self.methods:
           try:
-            u = fields[fields.index( m.upper() ) + 1]
+            M = m.upper()
+            if M not in fields:
+              # In access.log files methods are preceded by double quotes
+              M = '"'+M
+            u = fields[fields.index( M ) + 1]
             urls.append( u )
           finally:
             break
@@ -358,7 +362,7 @@ class UrlProvider( object ):
           url = rawurl+params
         urls_to_use.put( url )
     else:
-      raise PywenchException( 'No urls found for methods: %s' % repr( self.methods ) )
+      raise dioivoException( 'No urls found for methods: %s' % repr( self.methods ) )
 
     return urls_to_use
 
@@ -521,7 +525,7 @@ class DataManager( object ):
 
   def print_stats(self):
     if self.stat['ttfb']['min'] is None:
-      raise PywenchException( 'All requests failed' )
+      raise dioivoException( 'All requests failed' )
     self.output+= ' Stats\n\n'
     self.output+= ' \tminimum\t\taverage\t\tmaximum\n'
     self.output+= ' \t-------\t\t-------\t\t-------\n'
@@ -676,7 +680,7 @@ def pw_main( opts ):
   sys.stdout.flush()
 
   # Colors
-  C = pywenchColor()
+  C = dioivoColor()
 
   # Create needed instances
   up = UrlProvider(
@@ -687,13 +691,13 @@ def pw_main( opts ):
     methods = opts.methods
   )
   dm = DataManager( opts.total_requests, opts.concurrency, opts.http_version )
-  ag = PyWenchAgent( opts.host, opts.http_version, opts.auth_rule, opts.headers )
+  ag = dioivoAgent( opts.host, opts.http_version, opts.auth_rule, opts.headers )
 
   raw_data = Manager().list()
   event = Event()
 
   # Create processes for concurrency
-  pwm = PyWenchManager( opts.concurrency )
+  pwm = dioivoManager( opts.concurrency )
   pwm.start(
     target = ag.request_worker,
     args = ( event, up.queue, raw_data )
@@ -755,7 +759,7 @@ if __name__ == '__main__':
   try:
     opts = pw_getopts()
     pw_main( opts )
-  except PywenchException as e:
+  except dioivoException as e:
     print( 'Error: %s' % e.__str__() )
     sys.exit(1)
   except KeyboardInterrupt as e:  # Ctrl-C
