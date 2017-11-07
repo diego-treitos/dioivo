@@ -640,11 +640,11 @@ def pw_getopts():
                       type=lambda kv: kv.split(":", 1),
                       help="Adds a header to the requests. It can be specified multiple times. For example: -H 'User-Agent: MyUserAgent'")
 
-  parser.add_argument("-l", "--live",
+  parser.add_argument("-e", "--examine",
                       action="store_true",
-                      dest="dynamic_plot",
+                      dest="examine_plot",
                       default=False,
-                      help="If you enable this flag, you'll be able to examine live the plot of the benchmark at the end of the benchmark")
+                      help="If you enable this flag, you'll be able to examine the graph for the benchmark when it finishes. Note that this requires matplotlib and an X environment.")
 
   parser.add_argument("-M", "--methods",
                       action="store",
@@ -663,7 +663,7 @@ def pw_getopts():
     parser.error('Concurrency not given (-c)')
   if not opts.total_requests:
     parser.error('Number of requests not given (-n)')
-  if opts.dynamic_plot and not os.getenv('DISPLAY'):
+  if opts.examine_plot and not os.getenv('DISPLAY'):
     parser.error('X Server not available for live display (-l)')
 
   try:
@@ -750,8 +750,7 @@ def pw_main( opts ):
 
   dm.save( file_prefix )
 
-  if opts.dynamic_plot and plt:
-    dm.replot()
+  if opts.examine_plot and plt:
     plt.show()
 
 
