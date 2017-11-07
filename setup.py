@@ -3,37 +3,37 @@
 # vim: set ts=2 sw=2 sts=2 et:
 
 
-import imp
 import os
 import sys
 import shutil
 from setuptools import setup
 from subprocess import Popen
-dioivo = imp.load_source('dioivo', './dioivo')
+from dioivo_meta.globals import VERSION as D_VERSION, AUTHOR as D_AUTHOR, AUTHOR_EMAIL as D_EMAIL, URL as D_URL
+
 
 #####################################################
 #NOTE: The .deb generation via bdist_rpm override   #
 #      requires: fakeroot, alien, dpkg-buildpackage #
 #####################################################
 
-NAME        = "dioivo"
-VERSION     = dioivo.VERSION
-AUTHOR      = dioivo.AUTHOR
-AUTHOR_EMAIL= dioivo.AUTHOR_EMAIL
-URL         = dioivo.URL
-LICENSE     = "GPLv3"
-DESCRIPTION = "HTTP Benchmarking tool using access log to extract requests and simulate traffic"
 
 #-- GOBAL VARS --#
+NAME        = "dioivo"
+VERSION     = D_VERSION
+AUTHOR      = D_AUTHOR
+AUTHOR_EMAIL= D_EMAIL
+URL         = D_URL
+LICENSE     = "GPLv3"
+DESCRIPTION = "HTTP Benchmarking tool using access log to extract requests and simulate traffic"
 LONG_DESCRIPTION = """%s
 Author: %s <%s>
 Project: %s
 """ % ( DESCRIPTION, AUTHOR, AUTHOR_EMAIL, URL )
 
-SCRIPTS=['diovio']
-PACKAGES=[]
+SCRIPTS=['dioivo']
+PACKAGES=['dioivo_meta']
 MANIFEST="""
-include diovio
+include dioivo_meta
 """
 DATA_FILES={}
 

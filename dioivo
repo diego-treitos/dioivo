@@ -30,6 +30,7 @@ import urllib3
 from argparse import ArgumentParser
 from multiprocessing import Process, Event, Queue, Manager
 from random import Random
+from dioivo_meta.globals import VERSION, AUTHOR, AUTHOR_EMAIL, URL, SOCKET_TIMEOUT, DEFAULT_HEADERS
 
 try:
   if not os.getenv('DISPLAY'):
@@ -37,24 +38,12 @@ try:
     mpl.use('Agg')
   import matplotlib.pyplot as plt
 except ImportError:
-  print( '\nWARNING: Could not import matplotlib. Graphs will not be generated\n' )
   plt = None
 
 
 # Disable warnings for invalid certificates
 urllib3.disable_warnings( urllib3.exceptions.InsecureRequestWarning )
 
-VERSION     = "1.0.5"
-AUTHOR      = "Diego Blanco"
-AUTHOR_EMAIL= "diego.blanco@treitos.com"
-URL         = "https://github.com/diego-treitos/dioivo"
-
-DEBUG=False
-SOCKET_TIMEOUT=90
-DEFAULT_HEADERS={
-  'User-Agent: '
-  'Accept-Encoding': 'gzip, deflate'
-}
 
 START_TIME=0
 STOP_TIME=0
@@ -250,7 +239,7 @@ class dioivoAgent( object ):
           ttlb = time.time() - start
 
         except Exception as e:
-          if not isinstance(e, (urllib3.exceptions.MaxRetryError)) and DEBUG:
+          if not isinstance(e, (urllib3.exceptions.MaxRetryError)):
             print_debug("\n[%d] Exception occurred: %s\n" % (os.getpid(), e.__repr__()))
 
         finally:
@@ -284,7 +273,7 @@ class dioivoAgent( object ):
       sys.exit( 1 )
 
 
-class UrlProvider( object ):
+class dioivoUrlProvider( object ):
 
   def __init__(self, urls_file_path, mode, requests_number, replace_parameter_list=[], methods=['GET']):
     """mode = [random,squence]"""
@@ -371,7 +360,7 @@ class UrlProvider( object ):
     return urls_to_use
 
 
-class DataManager( object ):
+class dioivoDataManager( object ):
 
   def __init__(self, total_requests, concurrency, http_version):
     self.data = {}
@@ -572,7 +561,7 @@ class DataManager( object ):
       plt.legend()
 
 
-def pw_getopts():
+def dioivo_getopts():
   parser = ArgumentParser(usage="usage: %(prog)s [options] -s SERVER -u URLS_FILE -c CONCURRENCY -n NUMBER_OF_REQUESTS")
 
   parser.add_argument("-i", "--test-id",
@@ -659,10 +648,25 @@ def pw_getopts():
 
   parser.add_argument('-D', '--debug',
                       action='store_true',
+                      dest="debug",
+                      default=False,
+                      help='Show debug information. For debugging only.')
+
+  parser.add_argument('-V', '--version',
+                      action='store_true',
+                      dest="version",
                       default=False,
                       help='Show debug information. For debugging only.')
 
   opts = parser.parse_args()
+
+  if opts.version:
+    print( "dioivo %s\nAuthor: %s <%s>\nProject: %s" % (
+      VERSION,
+      AUTHOR,
+      AUTHOR_EMAIL,
+      URL))
+    sys.exit( 0 )
 
   if not opts.host:
     parser.error('Missing host to test (-s)')
@@ -684,7 +688,10 @@ def pw_getopts():
   return opts
 
 
-def pw_main( opts ):
+def dioivo_main( opts ):
+  if not plt:
+    print( '\nWARNING: Could not import matplotlib. Graphs will not be generated\n' )
+
   print( '\nSetting up...' ),
   sys.stdout.flush()
 
@@ -692,24 +699,24 @@ def pw_main( opts ):
   C = dioivoColor()
 
   # Create needed instances
-  up = UrlProvider(
+  dup = dioivoUrlProvider(
     opts.urls_file,
     opts.mode,
     opts.total_requests,
     replace_parameter_list=opts.replace_parameter,
     methods = opts.methods
   )
-  dm = DataManager( opts.total_requests, opts.concurrency, opts.http_version )
-  ag = dioivoAgent( opts.host, opts.http_version, opts.auth_rule, opts.headers )
+  ddm = dioivoDataManager( opts.total_requests, opts.concurrency, opts.http_version )
+  dag = dioivoAgent( opts.host, opts.http_version, opts.auth_rule, opts.headers )
 
   raw_data = Manager().list()
   event = Event()
 
   # Create processes for concurrency
-  pwm = dioivoManager( opts.concurrency )
-  pwm.start(
-    target = ag.request_worker,
-    args = ( event, up.queue, raw_data )
+  dm = dioivoManager( opts.concurrency )
+  dm.start(
+    target = dag.request_worker,
+    args = ( event, dup.queue, raw_data )
   )
 
   # Set event so we ensure all threads
@@ -718,15 +725,15 @@ def pw_main( opts ):
   START_TIME=time.time()
   event.set()
 
-  print( "\r Requests: %d\t\tConcurrency: %d" % ( opts.total_requests, pwm.pl.__len__()) )
+  print( "\r Requests: %d\t\tConcurrency: %d" % ( opts.total_requests, dm.pl.__len__()) )
   # bs: progress bar size
   bs=50
 
   # Main loop with progress bar and plotting
   time.sleep(1)
-  last_qsize = up.queue.qsize()
-  while not up.queue.empty():
-    qsize = up.queue.qsize()
+  last_qsize = dup.queue.qsize()
+  while not dup.queue.empty():
+    qsize = dup.queue.qsize()
     per=(qsize*bs)/opts.total_requests
     print( ' %s%s%s%s%s %d rps     \r' % (C.crossedout+C.white, ' '*(bs-per-1), C.grey, ' '*per, C.reset, (last_qsize-qsize)*2) ),
     sys.stdout.flush()
@@ -740,24 +747,24 @@ def pw_main( opts ):
 
   print( ' Stopping...' ),
   sys.stdout.flush()
-  pwm.stop()
+  dm.stop()
 
   print( "\r Compiling stats..." ),
   sys.stdout.flush()
   for d in raw_data:
-    dm.add_data(d)
-  dm.compile_stats()
+    ddm.add_data(d)
+  ddm.compile_stats()
 
   print( "\r                    \r" ),
   sys.stdout.flush()
-  dm.print_stats()
+  ddm.print_stats()
 
   # Saving information
   file_prefix='%s_r%d_c%d' %(opts.host.split('://')[1], opts.total_requests, opts.concurrency)
   if opts.test_id:
     file_prefix='%s_%s' %(opts.test_id, file_prefix)
 
-  dm.save( file_prefix )
+  ddm.save( file_prefix )
 
   if opts.examine_plot and plt:
     plt.show()
@@ -765,8 +772,8 @@ def pw_main( opts ):
 
 if __name__ == '__main__':
   try:
-    opts = pw_getopts()
-    pw_main( opts )
+    opts = dioivo_getopts()
+    dioivo_main( opts )
   except dioivoException as e:
     print( 'Error: %s' % e.__str__() )
     sys.exit(1)
