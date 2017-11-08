@@ -519,22 +519,22 @@ class dioivoDataManager( object ):
   def print_stats(self):
     if self.stat['ttfb']['min'] is None:
       raise dioivoException( 'All requests failed' )
-    self.output+= ' Stats\n\n'
-    self.output+= ' \tminimum\t\taverage\t\tmaximum\n'
-    self.output+= ' \t-------\t\t-------\t\t-------\n'
-    self.output+= ' ttfb\t%.5f s\t%.5f s\t%.5f s\n' % (self.stat['ttfb']['min'], self.stat['ttfb']['avg'], self.stat['ttfb']['max'])
-    self.output+= ' ttlb\t%.5f s\t%.5f s\t%.5f s\n\n' % (self.stat['ttlb']['min'], self.stat['ttlb']['avg'], self.stat['ttlb']['max'])
-    self.output+= ' mbps\t%.3f Mbps\t%.3f Mbps\t%.3f Mbps\n' % (self.stat['mbps']['min'], self.stat['mbps']['avg'], self.stat['mbps']['max'])
+    self.output+= '  Stats\n\n'
+    self.output+= '  \tminimum\t\taverage\t\tmaximum\n'
+    self.output+= '  \t-------\t\t-------\t\t-------\n'
+    self.output+= '  ttfb\t%.5f s\t%.5f s\t%.5f s\n' % (self.stat['ttfb']['min'], self.stat['ttfb']['avg'], self.stat['ttfb']['max'])
+    self.output+= '  ttlb\t%.5f s\t%.5f s\t%.5f s\n\n' % (self.stat['ttlb']['min'], self.stat['ttlb']['avg'], self.stat['ttlb']['max'])
+    self.output+= '  mbps\t%.3f Mbps\t%.3f Mbps\t%.3f Mbps\n' % (self.stat['mbps']['min'], self.stat['mbps']['avg'], self.stat['mbps']['max'])
     self.output+= '\n\n'
-    self.output+= ' Requests per second: %d rps\n' % self.stat['rps']
+    self.output+= '  Requests per second: %d rps\n' % self.stat['rps']
     self.output+= '\n\n'
-    self.output+= ' URL min ttfb: (%.5f s) %s\n' % self.stat['url']['min_ttfb']
-    self.output+= ' URL max ttfb: (%.5f s) %s\n' % self.stat['url']['max_ttfb']
-    self.output+= ' URL min ttlb: (%.5f s) %s\n' % self.stat['url']['min_ttlb']
-    self.output+= ' URL max ttlb: (%.5f s) %s\n' % self.stat['url']['max_ttlb']
-    self.output+= ' NOTE: These stats are based on the average time (ttfb or ttlb) for each url.\n'
+    self.output+= '  URL min ttfb: (%.5f s) %s\n' % self.stat['url']['min_ttfb']
+    self.output+= '  URL max ttfb: (%.5f s) %s\n' % self.stat['url']['max_ttfb']
+    self.output+= '  URL min ttlb: (%.5f s) %s\n' % self.stat['url']['min_ttlb']
+    self.output+= '  URL max ttlb: (%.5f s) %s\n' % self.stat['url']['max_ttlb']
+    self.output+= '  NOTE: These stats are based on the average time (ttfb or ttlb) for each url.\n'
     self.output+= '\n\n'
-    self.output+= ' Protocol stats:\n'
+    self.output+= '  Protocol stats:\n'
     code_list = self.stat['code'].keys()
     code_list.sort()
     for c in code_list:
@@ -725,7 +725,7 @@ def dioivo_main( opts ):
   START_TIME=time.time()
   event.set()
 
-  print( "\r Requests: %d\t\tConcurrency: %d" % ( opts.total_requests, dm.pl.__len__()) )
+  print( "\r  Requests: %d\t\tConcurrency: %d" % ( opts.total_requests, dm.pl.__len__()) )
   # bs: progress bar size
   bs=50
 
@@ -735,12 +735,12 @@ def dioivo_main( opts ):
   while not dup.queue.empty():
     qsize = dup.queue.qsize()
     per=(qsize*bs)/opts.total_requests
-    print( ' %s%s%s%s%s %d rps     \r' % (C.crossedout+C.white, ' '*(bs-per-1), C.grey, ' '*per, C.reset, (last_qsize-qsize)*2) ),
+    print( '  %s%s%s%s%s  %d rps     \r' % (C.underline+C.white, ' '*(bs-per-1), C.grey, ' '*per, C.reset, (last_qsize-qsize)*2) ),
     sys.stdout.flush()
     time.sleep(0.5)
     last_qsize = qsize
     sys.stdout.flush()
-  print( '%s              \n' % (' '*bs) ),
+  print( '%s                  \n' % (' '*bs) ),
   sys.stdout.flush()
   global STOP_TIME
   STOP_TIME=time.time()
@@ -749,13 +749,13 @@ def dioivo_main( opts ):
   sys.stdout.flush()
   dm.stop()
 
-  print( "\r Compiling stats..." ),
+  print( "\r  Compiling stats..." ),
   sys.stdout.flush()
   for d in raw_data:
     ddm.add_data(d)
   ddm.compile_stats()
 
-  print( "\r                    \r" ),
+  print( "\r                     \r" ),
   sys.stdout.flush()
   ddm.print_stats()
 
