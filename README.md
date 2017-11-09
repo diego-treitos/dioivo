@@ -87,14 +87,81 @@ optional arguments:
 
 ## Example of use
 
+In this example I used a test server with a new wordpress installation. I got the `access.log` file (this one had only around 20 requets but it may have thousands, that is why it also opens gziped access.log) and executed the following command with the most basic options that `dioivo` requires. _NOTE: The domain is of course an example_.
+
+```
+dioivo -s https://wordpress.myexample.net -u /tmp/test_access.log -c 20 -n 5000
+```
+And after the fancy progress bar finishes, we see this information in the console output
+
+```
+  Requests: 5000		Concurrency: 20
+                                                                    
+  Stats              
+
+  	    minimum		     average		    maximum
+  	    -------		     -------		    -------
+  ttfb	0.04933 s	     0.06236 s	    0.85967 s
+  ttlb	0.04943 s	     0.06917 s	    0.91487 s
+
+  mbps	2.329 Mbps	   100.574 Mbps	  418.695 Mbps
 
 
+  Requests per second: 285 rps
 
 
+  URL min ttfb: (0.05925 s) /wp-content/themes/twentyseventeen/assets/js/global.js?ver=1.0
+  URL max ttfb: (0.06688 s) /wp-includes/js/jquery/jquery-migrate.min.js?ver=1.4.1
+  URL min ttlb: (0.05944 s) /wp-content/themes/twentyseventeen/assets/js/global.js?ver=1.0
+  URL max ttlb: (0.14086 s) /wp-content/themes/twentyseventeen/assets/images/header.jpg
+  NOTE: These stats are based on the average time (ttfb or ttlb) for each url.
 
+
+  Protocol stats:
+	     HTTP 200:  5000 requests (100.00%)
+```
+And it also generates this 4 files:
+
+* wordpress.myexample.net_r5000_c20.csv
+* wordpress.myexample.net_r5000_c20.png
+* wordpress.myexample.net_r5000_c20.stat
+* wordpress.myexample.net_r5000_c20.txt
+
+In this case, the generated graph looks like this
+
+![plot](https://i.imgur.com/fjQpHPo.png)
+
+*Clarification* You may ask why the initial spike. This was a new server installed behind the _treitos caching platform_. The first requests were not in the cache so they took more time to be served. Afther the caches were populated things were much faster.
+
+
+## How can I install it?
+
+`dioivo` has 2 requirements
+
+  * `urllib3`
+  * `numpy`
+  
+ but if you want to have the graphs, you will need to install `matplotlib` too.
+ 
+ You can install `dioivo` with
+ 
+ ```
+ pip install dioivo
+ ```
 
 ## FAQ
 
 * Why was it splited from the dgtool repository ?
+
+  I found that the project got mature enough to have a repository of its own so I could properly manage it.
+  
 * Why the name change ?
+
+  Well... I thought that `pywench` was not a bad enough name.
+  
 * What headers does `dioivo` use by default ?
+
+  By default it sends:
+  
+  * `User-Agent: dioivo/{{ VERSION }}`                                                                                                                                                                                                     
+  * `Accept-Encoding: gzip, deflate`
