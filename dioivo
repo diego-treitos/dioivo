@@ -732,6 +732,9 @@ def dioivo_main( opts ):
   # Main loop with progress bar and plotting
   time.sleep(1)
   last_qsize = dup.queue.qsize()
+
+  # make room for the progress bar
+  print( '\n\n\x1b[3A' )
   while not dup.queue.empty():
     qsize = dup.queue.qsize()
     per=(qsize*bs)/opts.total_requests
