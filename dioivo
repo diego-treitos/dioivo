@@ -656,7 +656,7 @@ def dioivo_getopts():
                       action='store_true',
                       dest="version",
                       default=False,
-                      help='Show debug information. For debugging only.')
+                      help='Show version information and exit.')
 
   opts = parser.parse_args()
 
