@@ -550,14 +550,14 @@ class dioivoDataManager( object ):
     if plt:
       order = np.argsort( self.plot_time_data )
       xs = np.array( self.plot_time_data )[order]
-      ttfb_ys = np.array( self.plot_ttfb_data )[order]
       ttlb_ys = np.array( self.plot_ttlb_data )[order]
+      ttfb_ys = np.array( self.plot_ttfb_data )[order]
 
       plt.title('Requests: %d   User concurrency: %d   HTTP %.1f' % (self.total_requests, self.concurrency, self.http_version/10.), loc='right')
       plt.xlabel('benchmark time (s)')
       plt.ylabel('request time (s)')
-      plt.plot( xs, ttfb_ys, color="green", linewidth=1.0, linestyle="-", label="ttfb" )
       plt.plot( xs, ttlb_ys, color="blue", linewidth=1.0, linestyle="-", label="ttlb" )
+      plt.plot( xs, ttfb_ys, color="green", linewidth=1.0, linestyle="-", label="ttfb" )
       plt.legend()
 
 
