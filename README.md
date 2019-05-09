@@ -99,12 +99,12 @@ And after the fancy progress bar finishes, we see this information in the consol
                                                                     
   Stats              
 
-  	    minimum		     average		    maximum
-  	    -------		     -------		    -------
-  ttfb	    0.04933 s	             0.06236 s	            0.85967 s
-  ttlb	    0.04943 s	             0.06917 s	            0.91487 s
+            minimum                  average                maximum
+            -------                  -------                -------
+  ttfb      0.04933 s                0.06236 s              0.85967 s
+  ttlb      0.04943 s                0.06917 s              0.91487 s
 
-  mbps	    2.329 Mbps	             100.574 Mbps	    418.695 Mbps
+  mbps      2.329 Mbps               100.574 Mbps           418.695 Mbps
 
 
   Requests per second: 285 rps
@@ -165,3 +165,7 @@ In this case, the generated graph looks like this
   
   * `User-Agent: dioivo/{{ VERSION }}`                                                                                                                                                                                                     
   * `Accept-Encoding: gzip, deflate`
+
+* How do I use basic HTTP authenticaton ?
+
+  Having user `USER` and password `PASS` you can add the basic authentication header by adding: `-H "Authorization: Basic $(echo 'USER:PASS'|base64)"` to the parameters.
